@@ -4,7 +4,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 import { useRef } from "react";
 import { kindergarten, sectionIds } from "@/shared/data/kindergarten";
-import { useGallery } from "@/shared/hooks/useGallery";
+import { mediaRatio, useGallery } from "@/shared/hooks/useGallery";
 import { useLang } from "@/shared/i18n/LanguageProvider";
 import type { Media } from "@/shared/lib/media";
 import { Pearl, Sparkle } from "@/shared/ui/Decor";
@@ -13,28 +13,29 @@ import { InstagramIcon } from "@/shared/ui/Icons";
 import { Lightbox } from "@/shared/ui/Lightbox";
 import { MediaPlaceholder } from "@/shared/ui/MediaView";
 import { Reveal } from "@/shared/ui/Reveal";
-import { SectionHeading, container, sectionY } from "../ui";
+import { SectionHeading, container, sectionYCompact } from "../ui";
 
-const INITIAL = 6;
+const INITIAL = 4;
+const PER_ROW = 4;
 
 /**
- * Mosaic of 6 cells on a 4×3 grid: one large, one tall, one wide… repeated for every
- * six photos. Row height follows the viewport height so a laptop sees the whole block.
+ * Justified rows of four. Every photo keeps its own proportions (nothing is cropped):
+ * a cell is `--gal-h` tall and `--gal-h × ratio` wide; when a row is wider than the
+ * column, flex shrinks all cells by the same factor, so heights stay equal.
+ * `--gal-h` follows the visible browser height, so heading + first row + button fit
+ * one laptop screen under the fixed header.
  */
-const pattern = [
-  "col-span-2 row-span-2 rounded-[2.25rem_1rem_1rem_1rem]",
-  "rounded-[1rem_2rem_1rem_1rem]",
-  "row-span-2 rounded-[1rem_1rem_2.25rem_1rem]",
-  "rounded-[1rem]",
-  "col-span-2 rounded-[1rem_1rem_1rem_2.25rem]",
-  "col-span-2 rounded-[1rem_1rem_2.25rem_1rem]",
-];
-const patternSizes = ["(min-width:1180px) 580px, 50vw", "290px", "290px", "290px", "580px", "580px"];
+const rowHeight = { "--gal-h": "clamp(9.5rem, 42dvh, 20rem)" } as React.CSSProperties;
 
-/** Grid for a leftover chunk (< 6 photos) — always fills its rows, never leaves holes. */
-const tailCols: Record<number, string> = { 1: "grid-cols-1", 2: "grid-cols-2", 3: "grid-cols-3", 4: "grid-cols-4", 5: "grid-cols-6" };
+/** Pearl-shell corners: the outer cells of a row get the soft, larger radius. */
+function corner(k: number, n: number) {
+  if (n === 1) return "rounded-[2rem_1rem_2rem_1rem]";
+  if (k === 0) return "rounded-[2rem_0.9rem_0.9rem_2rem]";
+  if (k === n - 1) return "rounded-[0.9rem_2rem_2rem_0.9rem]";
+  return k % 2 ? "rounded-[0.9rem_1.6rem_0.9rem_0.9rem]" : "rounded-[0.9rem_0.9rem_1.6rem_0.9rem]";
+}
 
-const rows = "auto-rows-[clamp(8.5rem,19vh,11.5rem)]";
+const cellStyle = (ratio: number): React.CSSProperties => ({ flex: `0 1 calc(var(--gal-h) * ${ratio})`, aspectRatio: ratio });
 
 function chunks<T>(items: T[], size: number) {
   const out: T[][] = [];
@@ -47,43 +48,31 @@ export function Gallery({ items }: { items: Media[] }) {
   const g = useGallery(items, INITIAL);
   const top = useRef<HTMLDivElement>(null);
 
-  const renderChunk = (chunk: Media[], start: number) => {
-    if (chunk.length === 6) {
-      return (
-        <div key={start} className={`grid grid-cols-4 ${rows} gap-3`}>
-          {chunk.map((item, k) => (
-            <div key={item.src} className={pattern[k]} style={{ overflow: "hidden" }}>
-              <GalleryTile item={item} index={start + k} sizes={patternSizes[k]} onOpen={g.show} />
-            </div>
-          ))}
-        </div>
-      );
-    }
-    const n = chunk.length;
-    return (
-      <div key={start} className={`grid ${tailCols[n]} ${rows} gap-3`}>
-        {chunk.map((item, k) => (
-          <div key={item.src} className={`overflow-hidden rounded-[1rem_1.75rem_1rem_1.75rem] ${n === 5 ? (k < 3 ? "col-span-2" : "col-span-3") : ""}`}>
-            <GalleryTile item={item} index={start + k} sizes={n <= 2 ? "580px" : "390px"} onOpen={g.show} />
+  const renderRow = (row: Media[], start: number) => (
+    <div key={start} className="flex items-center justify-center gap-[clamp(0.6rem,1vw,0.8rem)]" style={rowHeight}>
+      {row.map((item, k) => {
+        const ratio = mediaRatio(item);
+        return (
+          <div key={item.src} className={`min-w-0 overflow-hidden ${corner(k, row.length)}`} style={cellStyle(ratio)}>
+            <GalleryTile item={item} index={start + k} sizes={`${Math.min(720, Math.round(320 * ratio))}px`} onOpen={g.show} />
           </div>
-        ))}
-      </div>
-    );
-  };
+        );
+      })}
+    </div>
+  );
 
-  const initial = items.slice(0, INITIAL);
-  const extra = chunks(items.slice(INITIAL), 6);
+  const extra = chunks(items.slice(INITIAL), PER_ROW);
 
   return (
-    <section id={sectionIds.gallery} data-section aria-labelledby="gallery-title" className={`relative ${sectionY}`}>
+    <section id={sectionIds.gallery} data-section aria-labelledby="gallery-title" className={`relative ${sectionYCompact}`}>
       <div ref={top} className={container}>
-        <SectionHeading id="gallery-title" eyebrow={t.gallery.eyebrow} title={t.gallery.title} intro={t.gallery.intro} />
+        <SectionHeading compact id="gallery-title" eyebrow={t.gallery.eyebrow} title={t.gallery.title} intro={t.gallery.intro} />
 
         {items.length === 0 ? (
           <EmptyGallery />
         ) : (
-          <Reveal className="flex flex-col gap-3">
-            {renderChunk(initial, 0)}
+          <Reveal className="flex flex-col gap-[clamp(0.6rem,1vw,0.8rem)]">
+            {renderRow(items.slice(0, INITIAL), 0)}
             <AnimatePresence initial={false}>
               {g.expanded && (
                 <m.div
@@ -92,9 +81,9 @@ export function Gallery({ items }: { items: Media[] }) {
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                  className="flex flex-col gap-3 overflow-hidden"
+                  className="flex flex-col gap-[clamp(0.6rem,1vw,0.8rem)] overflow-hidden"
                 >
-                  {extra.map((chunk, c) => renderChunk(chunk, INITIAL + c * 6))}
+                  {extra.map((row, r) => renderRow(row, INITIAL + r * PER_ROW))}
                 </m.div>
               )}
             </AnimatePresence>
@@ -102,7 +91,7 @@ export function Gallery({ items }: { items: Media[] }) {
         )}
 
         {g.canExpand && (
-          <div className="mt-[clamp(1.25rem,3vh,2rem)] flex justify-center">
+          <div className="mt-[clamp(0.9rem,2.4dvh,1.5rem)] flex justify-center">
             <button
               type="button"
               aria-expanded={g.expanded}
@@ -125,20 +114,22 @@ export function Gallery({ items }: { items: Media[] }) {
   );
 }
 
-/** Until photos are uploaded: the same mosaic in pearl tones, with a pointer to Instagram. */
+const placeholderRatios = [1.35, 0.8, 1.2, 0.8];
+
+/** Until photos are uploaded: the same row in pearl tones, with a pointer to Instagram. */
 function EmptyGallery() {
   const { t } = useLang();
   return (
     <Reveal className="relative">
-      <div className={`grid grid-cols-4 ${rows} gap-3`} aria-hidden="true">
-        {pattern.map((cls, k) => (
-          <div key={k} className={`relative overflow-hidden ${cls}`}>
+      <div className="flex items-center justify-center gap-[clamp(0.6rem,1vw,0.8rem)]" style={rowHeight} aria-hidden="true">
+        {placeholderRatios.map((ratio, k) => (
+          <div key={k} className={`relative min-w-0 overflow-hidden ${corner(k, placeholderRatios.length)}`} style={cellStyle(ratio)}>
             <MediaPlaceholder compact />
           </div>
         ))}
       </div>
       <div className="absolute inset-0 grid place-items-center p-6">
-        <div className="glass relative flex max-w-sm flex-col items-center rounded-[2rem_1rem_2rem_1rem] border border-white px-8 py-7 text-center shadow-float">
+        <div className="glass relative flex max-w-sm flex-col items-center rounded-[2rem_1rem_2rem_1rem] border border-white px-7 py-[clamp(1rem,3dvh,1.6rem)] text-center shadow-float">
           <Pearl tint="lavender" className="w-9" />
           <p className="mt-3 font-display text-[1.35rem] leading-snug text-ink">{t.gallery.empty}</p>
           <p className="mt-1.5 text-[0.9rem] text-ink-soft">{t.gallery.emptyHint}</p>
