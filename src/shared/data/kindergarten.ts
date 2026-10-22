@@ -19,6 +19,14 @@ export const kindergarten = {
     url: "https://www.instagram.com/inzhu_naz_balabaksha/",
   },
   /**
+   * «Құжаттар / Документы»: the documents live in a shared Google Drive folder, the site only
+   * links to it. Paste the folder's share link here (Drive → Share → "Anyone with the link").
+   * While it is empty, the button shows "the link will appear soon" instead of a dead link.
+   */
+  documents: {
+    driveUrl: "",
+  },
+  /**
    * 2GIS has no organisation card for the kindergarten yet, but it does know the building
    * «Улица Аль-Фараби, 35, с. Мухаметжан Туймебаев» (geo id below). The point is 2GIS's own
    * position of that building — not hand-picked coordinates.
@@ -62,10 +70,11 @@ export const sectionIds = {
   features: "features",
   gallery: "gallery",
   schedule: "schedule",
+  documents: "documents",
   contacts: "contacts",
 } as const;
 
 export type SectionId = keyof typeof sectionIds;
 
 /** Header navigation (order matters). */
-export const navSections = ["home", "about", "groups", "gallery", "contacts"] as const satisfies readonly SectionId[];
+export const navSections = ["home", "about", "groups", "gallery", "documents", "contacts"] as const satisfies readonly SectionId[];

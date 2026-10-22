@@ -1,6 +1,7 @@
 import type { SiteMedia } from "@/shared/lib/media";
 import { About } from "./sections/About";
 import { Contacts } from "./sections/Contacts";
+import { Documents } from "./sections/Documents";
 import { Features } from "./sections/Features";
 import { Footer } from "./sections/Footer";
 import { Gallery } from "./sections/Gallery";
@@ -21,6 +22,7 @@ export function Website({ media }: { media: SiteMedia }) {
         <Features />
         <Gallery items={media.gallery} />
         <Schedule />
+        <Documents />
         <Contacts />
       </main>
       <Footer />

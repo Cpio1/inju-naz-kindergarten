@@ -1,6 +1,7 @@
 import type { SiteMedia } from "@/shared/lib/media";
 import { MobileAbout } from "./sections/MobileAbout";
 import { MobileContacts } from "./sections/MobileContacts";
+import { MobileDocuments } from "./sections/MobileDocuments";
 import { MobileFeatures } from "./sections/MobileFeatures";
 import { MobileFooter } from "./sections/MobileFooter";
 import { MobileGallery } from "./sections/MobileGallery";
@@ -21,6 +22,7 @@ export function MobileWebsite({ media }: { media: SiteMedia }) {
         <MobileFeatures />
         <MobileGallery items={media.gallery} />
         <MobileSchedule />
+        <MobileDocuments />
         <MobileContacts />
       </main>
       <MobileFooter />

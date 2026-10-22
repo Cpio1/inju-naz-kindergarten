@@ -23,6 +23,7 @@ export const ru: Dictionary = {
     about: "О нас",
     groups: "Группы",
     gallery: "Галерея",
+    documents: "Документы",
     contacts: "Контакты",
   },
   header: {
@@ -112,6 +113,15 @@ export const ru: Dictionary = {
     mealsTitle: "Питание",
     mealsValue: "4 раза в день",
     mealsNote: "Для детей предусмотрено четырёхразовое питание.",
+  },
+
+  documents: {
+    eyebrow: "Родителям",
+    title: "Документы",
+    text: "С документами детского сада можно ознакомиться в папке Google Drive.",
+    open: "Посмотреть документы",
+    note: "Google Drive откроется в новой вкладке",
+    soon: "Ссылка скоро появится",
   },
 
   contacts: {

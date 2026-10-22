@@ -15,6 +15,7 @@ export const kk = {
     about: "Біз туралы",
     groups: "Топтар",
     gallery: "Галерея",
+    documents: "Құжаттар",
     contacts: "Байланыс",
   },
   header: {
@@ -104,6 +105,15 @@ export const kk = {
     mealsTitle: "Тамақтану",
     mealsValue: "Күніне 4 мезгіл",
     mealsNote: "Балаларға күніне төрт мезгіл тамақтану қарастырылған.",
+  },
+
+  documents: {
+    eyebrow: "Ата-аналарға",
+    title: "Құжаттар",
+    text: "Балабақшаның құжаттарымен Google Drive папкасында танысуға болады.",
+    open: "Құжаттарды қарау",
+    note: "Google Drive жаңа бетте ашылады",
+    soon: "Сілтеме жақында қосылады",
   },
 
   contacts: {

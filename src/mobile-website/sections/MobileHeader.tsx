@@ -87,7 +87,7 @@ export function MobileHeader() {
                       className="flex min-h-14 items-center justify-between rounded-[1.25rem_0.75rem_1.25rem_0.75rem] border border-white bg-white/75 px-4 font-display text-[1.3rem] text-ink shadow-pearl active:bg-white"
                     >
                       <span className="flex items-center gap-3">
-                        <Pearl tint={(["turquoise", "lavender", "powder", "gold", "white"] as const)[i]} className="w-4" />
+                        <Pearl tint={(["turquoise", "lavender", "powder", "gold", "lavender", "white"] as const)[i]} className="w-4" />
                         {t.nav[key]}
                       </span>
                       <ArrowRight className="h-4 w-4 text-ink-soft" aria-hidden="true" />

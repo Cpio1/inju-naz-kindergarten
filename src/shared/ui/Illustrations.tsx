@@ -68,3 +68,36 @@ export function MealArt({ className = "" }: { className?: string }) {
     </svg>
   );
 }
+
+/** A small stack of papers sealed with a pearl — the documents section's emblem. */
+export function DocumentsArt({ className = "" }: { className?: string }) {
+  const id = useId().replace(/:/g, "");
+  return (
+    <svg viewBox="0 0 120 120" className={className} aria-hidden="true" focusable="false">
+      <defs>
+        <radialGradient id={`${id}-pearl`} cx="0.36" cy="0.3" r="0.8">
+          <stop offset="0" stopColor="#ffffff" />
+          <stop offset="0.5" stopColor="#f5f1ea" />
+          <stop offset="1" stopColor="#cfc7b8" />
+        </radialGradient>
+      </defs>
+      <ellipse cx="60" cy="110" rx="36" ry="4.5" fill="#294e59" opacity="0.08" />
+      {/* back sheets */}
+      <rect x="30" y="18" width="58" height="76" rx="9" fill="#dcd1f4" transform="rotate(-10 59 56)" />
+      <rect x="34" y="16" width="58" height="76" rx="9" fill="#a7dcd7" transform="rotate(7 63 54)" />
+      {/* front sheet with a folded corner */}
+      <path d="M32 22a9 9 0 0 1 9-9h30l17 17v66a9 9 0 0 1-9 9H41a9 9 0 0 1-9-9Z" fill="#ffffff" stroke="#e6e2d6" strokeWidth="1.5" />
+      <path d="M71 13v12a5 5 0 0 0 5 5h12" fill="#f2d7e6" />
+      <g stroke="#cfd8db" strokeWidth="4" strokeLinecap="round">
+        <path d="M44 44h30" />
+        <path d="M44 56h34" />
+        <path d="M44 68h22" />
+      </g>
+      {/* pearl seal */}
+      <circle cx="74" cy="86" r="11" fill="#294e59" />
+      <circle cx="73.5" cy="85.5" r="8.6" fill={`url(#${id}-pearl)`} />
+      <ellipse cx="70.5" cy="82" rx="2.6" ry="1.6" fill="#fff" transform="rotate(-32 70.5 82)" />
+      <path d="M96 20c.5 3.4 2.2 5.4 6 6-3.8.6-5.5 2.6-6 6-.5-3.4-2.2-5.4-6-6 3.8-.6 5.5-2.6 6-6Z" fill="#e3c48d" />
+    </svg>
+  );
+}
