@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-32 -32 64 64">
+  <defs>
+    <linearGradient id="t" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#7fc4bd"/><stop offset="1" stop-color="#c7ebe7"/></linearGradient>
+    <linearGradient id="l" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#a796d8"/><stop offset="1" stop-color="#e6defa"/></linearGradient>
+    <linearGradient id="p" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#d79bbb"/><stop offset="1" stop-color="#f7e2ee"/></linearGradient>
+    <radialGradient id="pearl" cx="0.36" cy="0.3" r="0.8"><stop offset="0" stop-color="#fff"/><stop offset="0.5" stop-color="#f5f1ea"/><stop offset="1" stop-color="#cfc7b8"/></radialGradient>
+  </defs>
+  <rect x="-31" y="-31" width="62" height="62" rx="20" fill="#F8F7F2"/>
+  <g transform="scale(0.94)">
+    <path d="M0 -7C8 -11 11 -24 0 -30C-11 -24 -8 -11 0 -7Z" fill="url(#t)" transform="rotate(-4)"/>
+    <path d="M0 -7C8 -11 11 -24 0 -30C-11 -24 -8 -11 0 -7Z" fill="url(#l)" transform="rotate(70) scale(0.9)"/>
+    <path d="M0 -7C8 -11 11 -24 0 -30C-11 -24 -8 -11 0 -7Z" fill="url(#p)" transform="rotate(143) scale(0.96)"/>
+    <path d="M0 -7C8 -11 11 -24 0 -30C-11 -24 -8 -11 0 -7Z" fill="url(#t)" transform="rotate(216) scale(0.9)"/>
+    <path d="M0 -7C8 -11 11 -24 0 -30C-11 -24 -8 -11 0 -7Z" fill="url(#l)" transform="rotate(288) scale(0.96)"/>
+    <circle r="9.6" fill="#294e59"/>
+    <circle r="7.6" cx="-0.4" cy="-0.4" fill="url(#pearl)"/>
+    <ellipse cx="-3" cy="-3.4" rx="2.4" ry="1.5" fill="#fff" transform="rotate(-32 -3 -3.4)"/>
+  </g>
+</svg>
