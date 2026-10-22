@@ -4,7 +4,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { AnimatePresence, m } from "motion/react";
 import { useRef } from "react";
 import { kindergarten, sectionIds } from "@/shared/data/kindergarten";
-import { useGallery } from "@/shared/hooks/useGallery";
+import { mediaRatio, useGallery } from "@/shared/hooks/useGallery";
 import { useLang } from "@/shared/i18n/LanguageProvider";
 import type { Media } from "@/shared/lib/media";
 import { Pearl } from "@/shared/ui/Decor";
@@ -17,20 +17,24 @@ import { MSectionHeading, mContainer, mSectionY } from "../ui";
 
 const INITIAL = 4;
 
-/** 2 columns × 3 short rows per four photos: one tall, two small, one wide. */
+/** Placeholder layout while there are no photos: 2 columns, one tall, two small, one wide. */
 const pattern = [
   "row-span-2 rounded-[1.5rem_0.6rem_0.6rem_0.6rem]",
   "rounded-[0.6rem_1.5rem_0.6rem_0.6rem]",
   "rounded-[0.6rem]",
   "col-span-2 rounded-[0.6rem_0.6rem_1.5rem_1.5rem]",
 ];
-const sizes = ["50vw", "50vw", "50vw", "100vw"];
-const tail: Record<number, string[]> = {
-  1: ["col-span-2 rounded-[1.5rem_0.6rem_1.5rem_0.6rem]"],
-  2: ["rounded-[1.5rem_0.6rem_0.6rem_0.6rem]", "rounded-[0.6rem_1.5rem_0.6rem_0.6rem]"],
-  3: [pattern[0], pattern[1], "rounded-[0.6rem_0.6rem_1.5rem_0.6rem]"],
-};
 const rows = "auto-rows-[clamp(7rem,31vw,9.5rem)]";
+
+const PER_ROW = 2;
+
+/** Alternating pearl-shell corners so the column of photos doesn't look like a plain grid. */
+function corner(row: number, k: number, n: number) {
+  if (n === 1) return "rounded-[1.5rem_0.6rem_1.5rem_0.6rem]";
+  const big = (row + k) % 2 === 0;
+  if (k === 0) return big ? "rounded-[1.5rem_0.6rem_0.6rem_0.6rem]" : "rounded-[0.6rem_0.6rem_0.6rem_1.5rem]";
+  return big ? "rounded-[0.6rem_0.6rem_1.5rem_0.6rem]" : "rounded-[0.6rem_1.5rem_0.6rem_0.6rem]";
+}
 
 function chunks<T>(items: T[], size: number) {
   const out: T[][] = [];
@@ -43,18 +47,25 @@ export function MobileGallery({ items }: { items: Media[] }) {
   const g = useGallery(items, INITIAL);
   const top = useRef<HTMLDivElement>(null);
 
-  const renderChunk = (chunk: Media[], start: number) => {
-    const cls = chunk.length === 4 ? pattern : tail[chunk.length];
-    return (
-      <div key={start} className={`grid grid-cols-2 ${rows} gap-2`}>
-        {chunk.map((item, k) => (
-          <div key={item.src} className={`overflow-hidden ${cls[k]}`}>
-            <GalleryTile item={item} index={start + k} sizes={cls[k].includes("col-span-2") ? "100vw" : sizes[k] ?? "50vw"} onOpen={g.show} />
+  /**
+   * Rows of two that keep every photo's proportions: widths are shared in proportion to the
+   * aspect ratios, so both photos in a row get the same height and nothing is cropped.
+   * A lone last photo is centred and capped in height instead of filling the whole width.
+   */
+  const renderRow = (row: Media[], start: number) => (
+    <div key={start} className="flex justify-center gap-2">
+      {row.map((item, k) => {
+        const ratio = mediaRatio(item);
+        const style: React.CSSProperties =
+          row.length === 1 ? { width: `min(100%, ${(ratio * 13).toFixed(2)}rem)`, aspectRatio: ratio } : { flex: `${ratio} 1 0`, aspectRatio: ratio };
+        return (
+          <div key={item.src} className={`min-w-0 overflow-hidden ${corner(start / PER_ROW, k, row.length)}`} style={style}>
+            <GalleryTile item={item} index={start + k} sizes={row.length === 1 ? "70vw" : "50vw"} onOpen={g.show} />
           </div>
-        ))}
-      </div>
-    );
-  };
+        );
+      })}
+    </div>
+  );
 
   return (
     <section id={sectionIds.gallery} data-section aria-labelledby="m-gallery-title" className={mSectionY}>
@@ -83,7 +94,7 @@ export function MobileGallery({ items }: { items: Media[] }) {
           </Reveal>
         ) : (
           <Reveal y={10} className="flex flex-col gap-2">
-            {renderChunk(items.slice(0, INITIAL), 0)}
+            {chunks(items.slice(0, INITIAL), PER_ROW).map((row, r) => renderRow(row, r * PER_ROW))}
             <AnimatePresence initial={false}>
               {g.expanded && (
                 <m.div
@@ -94,7 +105,7 @@ export function MobileGallery({ items }: { items: Media[] }) {
                   transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                   className="flex flex-col gap-2 overflow-hidden"
                 >
-                  {chunks(items.slice(INITIAL), 4).map((chunk, c) => renderChunk(chunk, INITIAL + c * 4))}
+                  {chunks(items.slice(INITIAL), PER_ROW).map((row, r) => renderRow(row, INITIAL + r * PER_ROW))}
                 </m.div>
               )}
             </AnimatePresence>

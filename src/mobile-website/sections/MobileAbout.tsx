@@ -1,6 +1,7 @@
 "use client";
 
 import { sectionIds } from "@/shared/data/kindergarten";
+import { mediaRatio } from "@/shared/hooks/useGallery";
 import { useLang } from "@/shared/i18n/LanguageProvider";
 import type { Media } from "@/shared/lib/media";
 import { ABOUT_SIZES } from "@/shared/lib/media-sizes";
@@ -20,6 +21,7 @@ const shapes = [
 export function MobileAbout({ media }: { media: Media | null }) {
   const { t } = useLang();
   const a = t.about;
+  const ratio = media ? Math.min(Math.max(mediaRatio(media), 0.8), 1.78) : 16 / 10;
   return (
     <section id={sectionIds.about} data-section aria-labelledby="m-about-title" className={mSectionY}>
       <div className={mContainer}>
@@ -47,7 +49,7 @@ export function MobileAbout({ media }: { media: Media | null }) {
         </ul>
 
         <Reveal y={12} className="relative mt-6">
-          <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[2rem_0.9rem_2rem_0.9rem] shadow-float">
+          <div className="relative w-full overflow-hidden rounded-[2rem_0.9rem_2rem_0.9rem] shadow-float" style={{ aspectRatio: ratio }}>
             <MediaView media={media} alt={a.mediaAlt} sizes={ABOUT_SIZES} placeholder={t.hero.placeholder} />
           </div>
           <Pearl tint="lavender" className="absolute -top-2.5 -right-1.5 w-6" />

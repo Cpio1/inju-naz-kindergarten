@@ -3,6 +3,7 @@
 import { ArrowRight, Baby, Clock3, MapPin, Users } from "lucide-react";
 import { m } from "motion/react";
 import { sectionIds } from "@/shared/data/kindergarten";
+import { mediaRatio } from "@/shared/hooks/useGallery";
 import { useLang } from "@/shared/i18n/LanguageProvider";
 import type { Media } from "@/shared/lib/media";
 import { HERO_SIZES } from "@/shared/lib/media-sizes";
@@ -24,6 +25,10 @@ const FRAME = "M0.07,0.2 C0.1,0.05 0.3,0.01 0.55,0.02 C0.8,0.03 0.96,0.1 0.985,0
 export function Hero({ media }: { media: Media | null }) {
   const { t } = useLang();
   const h = t.hero;
+  // A portrait photo gets a portrait frame of its own proportions — nothing important
+  // (like the «ІНЖУ-НАЗ» sign at the top of the building) is cut off by a landscape crop.
+  const ratio = media ? mediaRatio(media) : null;
+  const portrait = ratio !== null && ratio < 1.05;
   const facts = [
     { icon: Baby, label: h.factLabels.ages, value: h.facts.ages },
     { icon: Users, label: h.factLabels.groups, value: h.facts.groups },
@@ -111,7 +116,7 @@ export function Hero({ media }: { media: Media | null }) {
           initial={{ opacity: 0, scale: 0.96, y: 16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.15, ease }}
-          className="relative mx-auto w-full max-w-[34rem]"
+          className={`relative mx-auto ${portrait ? "w-fit max-w-full" : "w-full max-w-[34rem]"}`}
         >
           <svg width="0" height="0" className="absolute" aria-hidden="true" focusable="false">
             <clipPath id="inju-hero-clip" clipPathUnits="objectBoundingBox">
@@ -125,16 +130,23 @@ export function Hero({ media }: { media: Media | null }) {
             <path d={FRAME} fill="none" stroke="#5fa9a3" strokeOpacity="0.45" strokeWidth="1.2" vectorEffect="non-scaling-stroke" strokeDasharray="2 7" strokeLinecap="round" />
           </svg>
 
-          <div className="relative h-[min(62svh,560px)] min-h-[380px] w-full" style={{ clipPath: "url(#inju-hero-clip)" }}>
-            <MediaView media={media} alt={h.photoAlt} sizes={HERO_SIZES} priority placeholder={h.placeholder} />
+          <div
+            className={`relative ${portrait ? "h-[clamp(22rem,70dvh,36rem)] max-w-full" : "h-[min(62svh,560px)] min-h-[380px] w-full"}`}
+            style={{ clipPath: "url(#inju-hero-clip)", aspectRatio: portrait ? Math.max(ratio, 0.72) : undefined }}
+          >
+            <MediaView media={media} alt={h.photoAlt} sizes={HERO_SIZES} priority placeholder={h.placeholder} objectPosition="50% 0%" />
           </div>
 
           {/* floating accents — small, never over the faces in the centre of the frame */}
-          <PetalFlower className="absolute -top-8 -right-6 w-[clamp(4.5rem,7vw,6rem)] animate-float-slow" />
-          <PearlThread className="absolute -bottom-3 -left-10 w-[clamp(9rem,15vw,12rem)] rotate-[-8deg]" count={8} bend={0.3} />
-          <Drop tint="turquoise" className="absolute top-[18%] -left-7 w-7 animate-float" />
+          <PetalFlower className={`absolute -top-8 w-[clamp(4.5rem,7vw,6rem)] animate-float-slow ${portrait ? "-right-14" : "-right-6"}`} />
+          <PearlThread
+            className={`absolute w-[clamp(9rem,15vw,12rem)] rotate-[-8deg] ${portrait ? "-bottom-6 -left-[clamp(8rem,13vw,10.5rem)]" : "-bottom-3 -left-10"}`}
+            count={8}
+            bend={0.3}
+          />
+          <Drop tint="turquoise" className={`absolute top-[18%] w-7 animate-float ${portrait ? "-left-12" : "-left-7"}`} />
           <Sparkle className="absolute right-[12%] -bottom-6 w-4" color="#b9a9e6" />
-          <div className="glass absolute right-[-1.25rem] bottom-[14%] flex items-center gap-2.5 rounded-[1.1rem_1.6rem_1.6rem_0.5rem] border border-white/80 px-3.5 py-2.5 shadow-float">
+          <div className={`glass absolute bottom-[14%] ${portrait ? "left-[calc(100%-1.75rem)]" : "right-[-1.25rem]"} flex items-center gap-2.5 rounded-[1.1rem_1.6rem_1.6rem_0.5rem] border border-white/80 px-3.5 py-2.5 whitespace-nowrap shadow-float`}>
             <Clock3 className="h-5 w-5 text-turquoise-deep" aria-hidden="true" />
             <span className="text-[0.9rem] font-semibold text-ink">{h.facts.hours}</span>
           </div>

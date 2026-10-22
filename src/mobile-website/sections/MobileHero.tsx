@@ -3,6 +3,7 @@
 import { Baby, Clock3, MapPin, Users } from "lucide-react";
 import { m } from "motion/react";
 import { sectionIds } from "@/shared/data/kindergarten";
+import { mediaRatio } from "@/shared/hooks/useGallery";
 import { useLang } from "@/shared/i18n/LanguageProvider";
 import type { Media } from "@/shared/lib/media";
 import { HERO_SIZES } from "@/shared/lib/media-sizes";
@@ -21,6 +22,11 @@ const rise = (delay: number) => ({
 export function MobileHero({ media }: { media: Media | null }) {
   const { t } = useLang();
   const h = t.hero;
+  // the frame takes the photo's own proportions (portrait up to 3:4), so nothing is cut away
+  const ratio = media ? Math.min(Math.max(mediaRatio(media), 0.75), 1.5) : 4 / 3.6;
+  const portrait = ratio < 1;
+  // a softer arch for tall photos keeps the top corners of the picture (e.g. the sign) visible
+  const arch = portrait ? "rounded-[50%_50%_1.75rem_1.75rem/16%_16%_1.75rem_1.75rem]" : "rounded-[50%_50%_1.75rem_1.75rem/30%_30%_1.75rem_1.75rem]";
   const facts = [
     { icon: Baby, value: h.facts.ages, label: h.factLabels.ages },
     { icon: Users, value: h.facts.groups, label: h.factLabels.groups },
@@ -71,10 +77,10 @@ export function MobileHero({ media }: { media: Media | null }) {
           transition={{ duration: 0.7, delay: 0.2, ease }}
           className="relative mt-7"
         >
-          <div aria-hidden="true" className="absolute inset-x-3 -bottom-2 top-3 rounded-[50%_50%_1.75rem_1.75rem/34%_34%_1.75rem_1.75rem] bg-gradient-to-br from-lavender to-powder opacity-70" />
+          <div aria-hidden="true" className={`absolute inset-x-3 -bottom-2 top-3 ${arch} bg-gradient-to-br from-lavender to-powder opacity-70`} />
           {/* mobile frame: a soft arch, like the top of a shell */}
-          <div className="relative aspect-[4/3.6] w-full overflow-hidden rounded-[50%_50%_1.75rem_1.75rem/30%_30%_1.75rem_1.75rem] border-[3px] border-white shadow-float">
-            <MediaView media={media} alt={h.photoAlt} sizes={HERO_SIZES} priority placeholder={h.placeholder} />
+          <div className={`relative w-full overflow-hidden ${arch} border-[3px] border-white shadow-float`} style={{ aspectRatio: ratio }}>
+            <MediaView media={media} alt={h.photoAlt} sizes={HERO_SIZES} priority placeholder={h.placeholder} objectPosition="50% 0%" />
           </div>
           <PetalFlower className="absolute -top-4 -right-2 w-14" />
           <PearlThread className="absolute -top-1 -left-3 w-24 -rotate-12" count={6} bend={0.25} />

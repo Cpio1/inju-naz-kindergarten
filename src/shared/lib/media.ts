@@ -1,4 +1,5 @@
 import "server-only";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -9,6 +10,7 @@ import path from "node:path";
  *  - everything else in public/images — gallery, sorted by file name
  * Named files may sit in /public or in /public/images.
  * A video may have a poster next to it: `<name>-poster.jpg`.
+ * Byte-identical copies (e.g. the same photo saved twice under two names) are shown once.
  * Drop files in and redeploy — no code changes needed.
  */
 
@@ -113,20 +115,39 @@ function loadImage(dir: string, prefix: string, file: string): ImageMedia | null
   return size && size.width > 0 && size.height > 0 ? { kind: "image", src: url(prefix, file), ...size } : null;
 }
 
+/** Content fingerprint: size + hash of the first 4 MB (whole file for any photo). */
+function fingerprint(file: string) {
+  const fd = fs.openSync(file, "r");
+  try {
+    const { size } = fs.fstatSync(fd);
+    const head = Buffer.alloc(Math.min(size, 4 * 1024 * 1024));
+    fs.readSync(fd, head, 0, head.length, 0);
+    return `${size}:${crypto.createHash("sha1").update(head).digest("hex")}`;
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
+type Item = { name: string; media: Media; hash: string };
+
 function loadFolder(dir: string, prefix: string) {
   const files = list(dir);
   const posters = new Set(files.filter((f) => stem(f).endsWith("-poster") && IMAGE_EXT.test(f)));
-  const items: { name: string; media: Media }[] = [];
+  const items: Item[] = [];
   for (const file of files) {
     if (posters.has(file)) continue;
     const ext = path.extname(file).toLowerCase();
     if (IMAGE_EXT.test(file)) {
       const media = loadImage(dir, prefix, file);
-      if (media) items.push({ name: stem(file), media });
+      if (media) items.push({ name: stem(file), media, hash: fingerprint(path.join(dir, file)) });
     } else if (VIDEO_TYPES[ext]) {
       const posterFile = [...posters].find((p) => stem(p) === `${stem(file)}-poster`);
       const poster = posterFile ? loadImage(dir, prefix, posterFile) : null;
-      items.push({ name: stem(file), media: { kind: "video", src: url(prefix, file), type: VIDEO_TYPES[ext], poster } });
+      items.push({
+        name: stem(file),
+        media: { kind: "video", src: url(prefix, file), type: VIDEO_TYPES[ext], poster },
+        hash: fingerprint(path.join(dir, file)),
+      });
     }
   }
   return items;
@@ -136,13 +157,18 @@ export function getSiteMedia(): SiteMedia {
   const inImages = loadFolder(IMAGES_DIR, "/images");
   // Named files may also sit directly in /public.
   const named = [...inImages, ...loadFolder(PUBLIC_DIR, "")];
-  const find = (name: string) => named.find((m) => m.name === name)?.media ?? null;
+  const find = (name: string) => named.find((m) => m.name === name) ?? null;
 
   const hero = find("main-page");
   const about = find("main-page2");
-  const gallery = inImages
-    .filter((m) => m.media !== hero && m.media !== about && !SKIP.test(m.name))
-    .map((m) => m.media);
+  // A photo already used on the page, or seen earlier in the folder, is not repeated.
+  const seen = new Set([hero?.hash, about?.hash].filter(Boolean));
+  const gallery: Media[] = [];
+  for (const item of inImages) {
+    if (item === hero || item === about || SKIP.test(item.name) || seen.has(item.hash)) continue;
+    seen.add(item.hash);
+    gallery.push(item.media);
+  }
 
-  return { hero, about, gallery };
+  return { hero: hero?.media ?? null, about: about?.media ?? null, gallery };
 }
