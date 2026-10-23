@@ -19,12 +19,11 @@ export const kindergarten = {
     url: "https://www.instagram.com/inzhu_naz_balabaksha/",
   },
   /**
-   * «Құжаттар / Документы»: the documents live in a shared Google Drive folder, the site only
-   * links to it. Paste the folder's share link here (Drive → Share → "Anyone with the link").
-   * While it is empty, the button shows "the link will appear soon" instead of a dead link.
+   * «Құжаттар / Документы»: the documents live in a public Cloud Mail.ru folder, the site only
+   * links to it. While the link is empty, the button shows "the link will appear soon" instead of a dead link.
    */
   documents: {
-    driveUrl: "",
+    url: "https://cloud.mail.ru/public/EpLt/XSbaCop7P",
   },
   /**
    * 2GIS has no organisation card for the kindergarten yet, but it does know the building

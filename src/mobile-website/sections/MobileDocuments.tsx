@@ -8,11 +8,11 @@ import { DocumentsArt } from "@/shared/ui/Illustrations";
 import { Reveal } from "@/shared/ui/Reveal";
 import { mContainer } from "../ui";
 
-/** Compact card: emblem beside the title, text, full-width Google Drive button. */
+/** Compact card: emblem beside the title, text, full-width documents folder button. */
 export function MobileDocuments() {
   const { t } = useLang();
   const d = t.documents;
-  const url = kindergarten.documents.driveUrl;
+  const url = kindergarten.documents.url;
 
   return (
     <section id={sectionIds.documents} data-section aria-labelledby="m-documents-title" className="py-6">

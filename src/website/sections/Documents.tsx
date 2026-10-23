@@ -8,11 +8,11 @@ import { DocumentsArt } from "@/shared/ui/Illustrations";
 import { Reveal } from "@/shared/ui/Reveal";
 import { container } from "../ui";
 
-/** One compact pearl card: emblem, title + short text, and the Google Drive button. */
+/** One compact pearl card: emblem, title + short text, and the documents folder button. */
 export function Documents() {
   const { t } = useLang();
   const d = t.documents;
-  const url = kindergarten.documents.driveUrl;
+  const url = kindergarten.documents.url;
 
   return (
     <section id={sectionIds.documents} data-section aria-labelledby="documents-title" className="relative py-[clamp(1.5rem,5dvh,3rem)]">
